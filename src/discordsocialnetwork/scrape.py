@@ -76,62 +76,83 @@ all_friends_tab = driver.find_element(By.XPATH, "//div[contains(text(), 'All')]"
 all_friends_tab.click()
 time.sleep(3)  # Wait for the friend list to load
 
+running = True
+TotalFriends = friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
+
+while running:
 
 # Get all friend elements
-friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
 
-friend_data = {}
+    print("got here")
+    print(friends)
+
+    friend_data = {}
 
 # Iterate through each friend
-for friend in friends:
-    # Extract friend's name
-    friend_name_elem = friend.find_element(By.CLASS_NAME, "username-class")  # Update class name
-    friend_name = friend_name_elem.text
+    for friend in friends:
+        # Extract friend's name
+        friend_name_elem = friend.find_element(By.CLASS_NAME, "username-class")  # Update class name
+        friend_name = friend_name_elem.text
 
-    # Right-click and open profile
-    action = ActionChains(driver)
-    action.context_click(friend).perform()
-    time.sleep(1)
+        # Right-click and open profile
+        action = ActionChains(driver)
+        action.context_click(friend).perform()
+        time.sleep(1)
 
-    # Click "Profile" from context menu
-    profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
-    profile_option.click()
-    time.sleep(3)
+        # Click "Profile" from context menu
+        profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
+        profile_option.click()
+        time.sleep(3)
 
-    # Scrape mutual friends
-    mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friends')]")
-    mutual_friends_button.click()
-    time.sleep(2)
+        # Scrape mutual friends
+        mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friends')]")
+        mutual_friends_button.click()
+        time.sleep(2)
 
-    mutual_friends = []
-    mutual_friends_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
-    for mutual in mutual_friends_list:
-        name_elem = mutual.find_element(By.CLASS_NAME, "info_f4bc97")
-        mutual_friends.append(name_elem.text)
+        mutual_friends = []
+        mutual_friends_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
+        for mutual in mutual_friends_list:
+            name_elem = mutual.find_element(By.CLASS_NAME, "info_f4bc97")
+            mutual_friends.append(name_elem.text)
 
-    # Scrape mutual servers
-    mutual_servers_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Server')]")
-    mutual_servers_button.click()
-    time.sleep(2)
+        # Scrape mutual servers
+        mutual_servers_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Server')]")
+        mutual_servers_button.click()
+        time.sleep(2)
 
-    mutual_servers = []
-    mutual_servers_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
-    for server in mutual_servers_list:
-        name_elem = server.find_element(By.CLASS_NAME, "info_f4bc97")
-        mutual_servers.append(name_elem.text)
+        mutual_servers = []
+        mutual_servers_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
+        for server in mutual_servers_list:
+            name_elem = server.find_element(By.CLASS_NAME, "info_f4bc97")
+            mutual_servers.append(name_elem.text)
 
-    # Store the data
-    friend_data[friend_name] = {
-        "mutual_friends": mutual_friends,
-        "mutual_servers": mutual_servers,
-    }
+        # Store the data
+        friend_data[friend_name] = {
+            "mutual_friends": mutual_friends,
+            "mutual_servers": mutual_servers,
+        }
 
-    # Close profile (Escape key)
-    webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-    time.sleep(1)
+        # Close profile (Escape key)
+        webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+        time.sleep(1)
+
+    # now we scroll down to get more friends, rerun the friends element extractor and remove duplicates
+    # scroll
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    time.sleep(2)  # Wait for new content to load
+    friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
+    for friend in friends:
+        if friend in TotalFriends:
+            friends.remove(friend)
+        if len(friends) == 0:
+            running = False
+
+
 
 # Save data to JSON file
 with open("discord_friends_data.json", "w") as f:
     json.dump(friend_data, f, indent=4)
 
 print("Scraping complete! Data saved.")
+
+
