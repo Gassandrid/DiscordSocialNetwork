@@ -15,7 +15,7 @@ driver = webdriver.Chrome(options=options)
 driver.get("https://discord.com/login")
 
 # Allow time for the page to load
-time.sleep(3)
+time.sleep(2)
 
 # get user credentials via environment variables
 EMAIL = str(os.getenv("DISCORD_EMAIL"))
@@ -33,7 +33,7 @@ password_field.send_keys(PASSWORD)
 password_field.send_keys(Keys.RETURN)
 
 # Wait for the home page to load
-time.sleep(10)  # Adjust this based on your internet speed
+time.sleep(5)  # Adjust this based on your internet speed
 
 
 # at this point we are logged in and on the main page
@@ -77,7 +77,7 @@ time.sleep(10)  # Adjust this based on your internet speed
 # Click on "All" friends tab
 all_friends_tab = driver.find_element(By.XPATH, "//div[contains(text(), 'All')]")
 all_friends_tab.click()
-time.sleep(3)  # Wait for the friend list to load
+time.sleep(1)  # Wait for the friend list to load
 
 running = True
 friend_data = {}
@@ -109,12 +109,50 @@ def parse_friends():
         
         # for each friend, get the name, right click, open profile, get mutual friends, get mutual servers, store data, close profile
         for friend in friends_to_check:
-            # Extract friend's name - using the correct Discord username class
-            friend_name_elem = friend.find_element(By.CLASS_NAME, "username_d272d6")
-            # right click and open profile
 
-        
-        
+            # Extract friend's name - using the correct Discord username class
+            #username__0a06e
+            friend_name_elem = friend.find_element(By.CLASS_NAME, "username__0a06e")
+            time.sleep(1)
+
+            # right click and open profile
+            ActionChains(driver).context_click(friend).perform()
+            time.sleep(1)
+
+            # now context is open, click profile button item_c1e9c4
+            profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
+            ActionChains(driver).click(profile_option).perform()
+            time.sleep(2)
+
+            # click mutual Friends
+            mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friend')]")
+            ActionChains(driver).click(mutual_friends_button).perform()
+            time.sleep(2)
+
+            # get all listRow__9d78f items, where the name is inside a span inside of a div with class info_f4bc97
+            info_elems = driver.find_elements(By.CLASS_NAME, "info_f4bc97")
+            names = [elem.text for elem in info_elems]
+            print(names)
+            time.sleep(1)
+
+            # click the mutual servers button
+            servers_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Server')]")
+            ActionChains(driver).click(servers_button).perform()
+            time.sleep(2)
+
+            # values are in the same format as mutual friends
+            server_elems = driver.find_elements(By.CLASS_NAME, "info_f4bc97")
+            servers = [elem.text for elem in server_elems]
+            print(servers)
+            time.sleep(1)
+
+            # add all the data to the output
+            # output = {friend_name: {"mutual_friends": names, "mutual_servers": servers}}
+            output[friend_name_elem.text] = {"mutual_friends": names, "mutual_servers": servers}
+
+            # press escape to close the profile
+            ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+            time.sleep(1)
         time.sleep(2)
 
         if current_height < max_height:
@@ -124,70 +162,21 @@ def parse_friends():
         else:
             running = False
 
+    return output
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+list = parse_friends()
 
 
 # while running:
 #     # Get all friend elements
 #     print("got here")
 #     print(friends)
-#
+
 # # Iterate through each friend
 #     for friend in friends:
 # # Extract friend's name - using the correct Discord username class
