@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import os
 import json
@@ -68,6 +69,8 @@ time.sleep(10)  # Adjust this based on your internet speed
 
 # all this info should be stored as the following:
 # name of user: string, list of mutual friends: list(string), list of mutual servers: list(string)
+#
+# <div class="peopleList__5ec2f auto__99f8c scrollerBase__99f8c" role="list"
 
 # ---
 
@@ -77,82 +80,179 @@ all_friends_tab.click()
 time.sleep(3)  # Wait for the friend list to load
 
 running = True
-TotalFriends = friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
+friend_data = {}
 
-while running:
+# because not al lthe friends are loaded at once, we need to scroll down and get more friends.
+# aka we load the friends, scroll, load friends and remove duplicates, and continue until we have all the friends.
+# returns a dictionary --> Key: friend name, Value: {"mutual_friends": [list of mutual friends], "mutual_servers": [list of mutual servers]}
+def parse_friends():
+    running = True
+    output = {}
+    TotalFriends = []
+    scroller = driver.find_element(By.CLASS_NAME, "peopleList__5ec2f")
 
-# Get all friend elements
+    # Scroll in smaller increments
+    current_height = 0
+    scroll_increment = 400  # Scroll 200 pixels at a time
+    max_height = driver.execute_script("return arguments[0].scrollHeight", scroller)
 
-    print("got here")
-    print(friends)
+    while running:
+        friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179") 
+        friends_to_check = []
+        # if not in TotalFriends, add to TotalFriends
+        for friend in friends:
+            if friend not in TotalFriends:
+                TotalFriends.append(friend)
+                # add to friends to check
+                friends_to_check.append(friend)
 
-    friend_data = {}
+        
+        # for each friend, get the name, right click, open profile, get mutual friends, get mutual servers, store data, close profile
+        for friend in friends_to_check:
+            # Extract friend's name - using the correct Discord username class
+            friend_name_elem = friend.find_element(By.CLASS_NAME, "username_d272d6")
+            # right click and open profile
 
-# Iterate through each friend
-    for friend in friends:
-        # Extract friend's name
-        friend_name_elem = friend.find_element(By.CLASS_NAME, "username-class")  # Update class name
-        friend_name = friend_name_elem.text
-
-        # Right-click and open profile
-        action = ActionChains(driver)
-        action.context_click(friend).perform()
-        time.sleep(1)
-
-        # Click "Profile" from context menu
-        profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
-        profile_option.click()
-        time.sleep(3)
-
-        # Scrape mutual friends
-        mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friends')]")
-        mutual_friends_button.click()
+        
+        
         time.sleep(2)
 
-        mutual_friends = []
-        mutual_friends_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
-        for mutual in mutual_friends_list:
-            name_elem = mutual.find_element(By.CLASS_NAME, "info_f4bc97")
-            mutual_friends.append(name_elem.text)
-
-        # Scrape mutual servers
-        mutual_servers_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Server')]")
-        mutual_servers_button.click()
-        time.sleep(2)
-
-        mutual_servers = []
-        mutual_servers_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
-        for server in mutual_servers_list:
-            name_elem = server.find_element(By.CLASS_NAME, "info_f4bc97")
-            mutual_servers.append(name_elem.text)
-
-        # Store the data
-        friend_data[friend_name] = {
-            "mutual_friends": mutual_friends,
-            "mutual_servers": mutual_servers,
-        }
-
-        # Close profile (Escape key)
-        webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-        time.sleep(1)
-
-    # now we scroll down to get more friends, rerun the friends element extractor and remove duplicates
-    # scroll
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)  # Wait for new content to load
-    friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
-    for friend in friends:
-        if friend in TotalFriends:
-            friends.remove(friend)
-        if len(friends) == 0:
+        if current_height < max_height:
+            current_height += scroll_increment
+            driver.execute_script(f"arguments[0].scrollTo(0, {current_height});", scroller)
+            time.sleep(1)  # Wait a bit between each scroll
+        else:
             running = False
 
 
 
-# Save data to JSON file
-with open("discord_friends_data.json", "w") as f:
-    json.dump(friend_data, f, indent=4)
 
-print("Scraping complete! Data saved.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# while running:
+#     # Get all friend elements
+#     print("got here")
+#     print(friends)
+#
+# # Iterate through each friend
+#     for friend in friends:
+# # Extract friend's name - using the correct Discord username class
+#         friend_name_elem = friend.find_element(By.CLASS_NAME, "username_d272d6")
+#         friend_name = friend_name_elem.text
+#
+#         # Right-click and open profile
+#         action = ActionChains(driver)
+#         action.context_click(friend).perform()
+#         time.sleep(1)
+#
+#         # Click "Profile" from context menu
+#         profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
+#         profile_option.click()
+#         time.sleep(3)
+#
+#         # Scrape mutual friends
+#         mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friends')]")
+#         mutual_friends_button.click()
+#         time.sleep(2)
+#
+#         mutual_friends = []
+#         mutual_friends_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
+#         for mutual in mutual_friends_list:
+#             name_elem = mutual.find_element(By.CLASS_NAME, "info_f4bc97")
+#             mutual_friends.append(name_elem.text)
+#
+#         # Scrape mutual servers
+#         mutual_servers_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Server')]")
+#         mutual_servers_button.click()
+#         time.sleep(2)
+#
+#         mutual_servers = []
+#         mutual_servers_list = driver.find_elements(By.CLASS_NAME, "listRow__9d78f")
+#         for server in mutual_servers_list:
+#             name_elem = server.find_element(By.CLASS_NAME, "info_f4bc97")
+#             mutual_servers.append(name_elem.text)
+#
+#         # Store the data
+#         friend_data[friend_name] = {
+#             "mutual_friends": mutual_friends,
+#             "mutual_servers": mutual_servers,
+#         }
+#
+#         # Close profile (Escape key)
+#         webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+#         time.sleep(1)
+#
+#     # now we scroll down to get more friends, rerun the friends element extractor and remove duplicates
+#     # scroll
+#     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+#     time.sleep(2)  # Wait for new content to load
+#     friends = driver.find_elements(By.CLASS_NAME, "peopleListItem_cc6179")
+#     for friend in friends:
+#         if friend in TotalFriends:
+#             friends.remove(friend)
+#         if len(friends) == 0:
+#             running = False
+#
+#
+
+# # Save data to JSON file
+# with open("discord_friends_data.json", "w") as f:
+#     json.dump(friend_data, f, indent=4)
+#
+# print("Scraping complete! Data saved.")
 
 
