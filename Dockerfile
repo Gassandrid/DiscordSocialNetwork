@@ -1,44 +1,31 @@
-# Use Python 3.12 as base image
-FROM python:3.12-slim
+FROM python:3.9-slim
 
-# Install system dependencies including Chrome
+# Install Chromium and related dependencies
 RUN apt-get update && apt-get install -y \
+  chromium \
+  chromium-driver \
   wget \
-  gnupg2 \
-  curl \
   unzip \
-  && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-  && apt-get update \
-  && apt-get install -y google-chrome-stable \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Install Chrome WebDriver
-RUN CHROME_DRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
-  && wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-  && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
-  && rm /tmp/chromedriver.zip \
-  && chmod +x /usr/local/bin/chromedriver
-
-# Set working directory
+# Create app directory
 WORKDIR /app
 
-# Copy project files
-COPY pyproject.toml .
-COPY src/ src/
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install poetry
-RUN pip install poetry
+# Copy script
+COPY discord_scraper.py .
 
-# Install project dependencies
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+# Create a volume for output data
+VOLUME /app/data
 
-# Set environment variables for headless Chrome
-ENV DISPLAY=:99
+# Set environment variables for Chromium
 ENV CHROME_OPTIONS="--headless --no-sandbox --disable-dev-shm-usage"
+ENV CHROMIUM_PATH="/usr/bin/chromium"
+ENV CHROMEDRIVER_PATH="/usr/bin/chromedriver"
 
 # Command to run the script
-CMD ["python", "src/discordsocialnetwork/scrape.py"]
-
+ENTRYPOINT ["python", "discord_scraper.py"]

@@ -46,9 +46,21 @@ friend_data = {}
 # because not al lthe friends are loaded at once, we need to scroll down and get more friends.
 # aka we load the friends, scroll, load friends and remove duplicates, and continue until we have all the friends.
 # returns a dictionary --> Key: friend name, Value: {"mutual_friends": [list of mutual friends], "mutual_servers": [list of mutual servers]}
+def load_existing_data():
+    try:
+        with open("friends.json", "r") as infile:
+            return json.load(infile)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_json(data):
+    json_object = json.dumps(data, indent=4)
+    with open("friends.json", "w") as outfile:
+        outfile.write(json_object)
+
 def parse_friends():
     running = True
-    output = {}
+    output = load_existing_data()  # Load existing data if any
     TotalFriends = []
     scroller = driver.find_element(By.CLASS_NAME, "peopleList__5ec2f")
 
@@ -74,21 +86,21 @@ def parse_friends():
             # Extract friend's name - using the correct Discord username class
             #username__0a06e
             friend_name_elem = friend.find_element(By.CLASS_NAME, "username__0a06e")
-            time.sleep(.1)
+            time.sleep(.2)
 
             # right click and open profile
             ActionChains(driver).context_click(friend).perform()
-            time.sleep(.1)
+            time.sleep(.2)
 
             # now context is open, click profile button item_c1e9c4
             profile_option = driver.find_element(By.XPATH, "//div[contains(text(), 'Profile')]")
             ActionChains(driver).click(profile_option).perform()
-            time.sleep(.1)
+            time.sleep(.3)
 
             # click mutual Friends
             mutual_friends_button = driver.find_element(By.XPATH, "//div[contains(text(), 'Mutual Friend')]")
             ActionChains(driver).click(mutual_friends_button).perform()
-            time.sleep(.1)
+            time.sleep(.2)
 
             # Find the profile modal first
             profile_modal = driver.find_element(By.XPATH, "//div[@aria-label='User Profile Modal']")
@@ -97,18 +109,18 @@ def parse_friends():
             info_elems = profile_modal.find_elements(By.CLASS_NAME, "info_f4bc97")
             names = [elem.text for elem in info_elems]
             print(names)
-            time.sleep(.1)
+            time.sleep(.2)
 
             # click the mutual servers button
             servers_button = profile_modal.find_element(By.XPATH, ".//div[contains(text(), 'Mutual Server')]")
             ActionChains(driver).click(servers_button).perform()
-            time.sleep(.1)
+            time.sleep(.2)
 
             # values are in the same format as mutual friends, but search within modal
             server_elems = profile_modal.find_elements(By.CLASS_NAME, "listName__9d78f")
             servers = [elem.text for elem in server_elems]
             print(servers)
-            time.sleep(.1)
+            time.sleep(.2)
 
             # the first output of the names and server mutals are the actual users name, so we remove them
             names.pop(0)
@@ -121,9 +133,13 @@ def parse_friends():
 
             # press escape to close the profile
             ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-            time.sleep(.1)
+            time.sleep(.2)
 
         time.sleep(.2)
+
+        # Save the current progress after processing each batch of friends
+        save_json(output)
+        print(f"Saved progress... Current friend count: {len(output)}")
 
         if current_height < max_height:
             current_height += scroll_increment
@@ -134,10 +150,7 @@ def parse_friends():
 
     return output
 
-list = parse_friends()
-
-# saving the results to a json file
-json_object = json.dumps(list, indent = 4)
-print(json_object)
-with open("friends.json", "w") as outfile:
-    outfile.write(json_object)
+# Run the scraper and get the final list
+final_list = parse_friends()
+print("Scraping completed!")
+print(f"Total friends processed: {len(final_list)}")

@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  discord-scraper:
+    build: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DISCORD_EMAIL=${DISCORD_EMAIL}
+      - DISCORD_PASSWORD=${DISCORD_PASSWORD}
+      - CHROME_OPTIONS=--headless --no-sandbox --disable-dev-shm-usage
