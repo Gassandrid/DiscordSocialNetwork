@@ -4,7 +4,7 @@ The purpose of this set of tools is to extract your discord friends, mutuals, an
 
 ## Preview
 
-[](images/preview.png)
+![Discord Social Graph Preview](./images/preview.png)
 
 ## Quick Start
 
