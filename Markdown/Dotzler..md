@@ -1,5 +1,0 @@
----
-name: Dotzler.
----
-
-# Dotzler.

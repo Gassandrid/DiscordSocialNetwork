@@ -1,5 +1,0 @@
----
-name: alligatorballs
----
-
-# alligatorballs

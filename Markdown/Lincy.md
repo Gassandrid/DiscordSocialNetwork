@@ -1,5 +1,0 @@
----
-name: Lincy
----
-
-# Lincy

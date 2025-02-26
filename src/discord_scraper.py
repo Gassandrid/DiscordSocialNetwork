@@ -6,6 +6,15 @@ import time
 import os
 import json
 
+# check if user has environment variables set, and if not, prompt them to set them
+if not os.getenv("DISCORD_EMAIL") or not os.getenv("DISCORD_PASSWORD"):
+    print("Please set your Discord email and password as environment variables.")
+    email = str(input("Enter your Discord email: "))
+    password = str(input("Enter your Discord password: "))
+else:
+    email = str(os.getenv("DISCORD_EMAIL"))
+    password = str(os.getenv("DISCORD_PASSWORD"))
+
 # Set up Chrome
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")  # Open in fullscreen
@@ -23,11 +32,11 @@ PASSWORD = str(os.getenv("DISCORD_PASSWORD"))
 
 # Find and fill in email field
 email_field = driver.find_element(By.NAME, "email")
-email_field.send_keys(EMAIL)
+email_field.send_keys(email)
 
 # Find and fill in password field
 password_field = driver.find_element(By.NAME, "password")
-password_field.send_keys(PASSWORD)
+password_field.send_keys(password)
 
 # Submit login form
 password_field.send_keys(Keys.RETURN)

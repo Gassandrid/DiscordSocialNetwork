@@ -1,5 +1,0 @@
----
-name: aurum
----
-
-# aurum
