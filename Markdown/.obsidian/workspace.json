@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "5d02d6fe57947256",
+        "id": "f9e26e96d0ba3f08",
         "type": "tabs",
         "children": [
           {
-            "id": "7d8b6220ee0cf688",
+            "id": "6f8196afd923bacb",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -49,7 +49,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "munch",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -70,7 +70,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -162,11 +163,34 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "7d8b6220ee0cf688",
+  "active": "6f8196afd923bacb",
   "lastOpenFiles": [
-    "👨dean.md",
-    "Cesar.md",
-    "preview_graph.png",
-    "nakati6182mna.md"
+    "ray.md",
+    "nakati6182mna.md",
+    "Munch.md",
+    "fishingrods.md",
+    "stoutspore.md",
+    "realmt.md",
+    "Calvin.md",
+    "BROTHER TEMPLAR.md",
+    "bonzuai.md",
+    "Jumpy.md",
+    "JoesphMother.md",
+    "Jackson.md",
+    "JxstEliza.md",
+    "Enderboxx.md",
+    "Konradowski.md",
+    "zhu.md",
+    "zay.md",
+    "yoduh.md",
+    "Xhurxhx.md",
+    "wxvy.md",
+    "Worif.md",
+    "werewolvedragon.md",
+    "waterworld.md",
+    "wagswags.md",
+    "VVolf.md",
+    "Vowsox.md",
+    "preview_graph.png"
   ]
 }
